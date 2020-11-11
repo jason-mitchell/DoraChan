@@ -1,0 +1,1 @@
+"./backlight.obj" "./beep.obj" "./char_lcd.obj" "./eeprom.obj" "./main.obj" "./rtc.obj" "./servo.obj" "./timer.obj" "./wiegand.obj" "../lnk_msp430g2553.cmd" -llibc.a 
