@@ -2,7 +2,7 @@
 <link_info>
    <banner>MSP430 Linker PC v20.2.2.LTS</banner>
    <copyright>Copyright (c) 2003-2018 Texas Instruments Incorporated</copyright>
-   <link_time>0x5fa70633</link_time>
+   <link_time>0x5faba55f</link_time>
    <link_errors>0x0</link_errors>
    <output_file>DORACHAN.out</output_file>
    <entry_point>

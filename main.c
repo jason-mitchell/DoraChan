@@ -2,6 +2,7 @@
 //       ドラちゃん
 //       [DORA-CHAN]
 //       ACCESS CONTROL FOR CATS [猫のアクセス制御]
+//       https://github.com/jason-mitchell/DoraChan
 //       Version 1.0
 //       31 Oct '20
 //
