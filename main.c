@@ -31,16 +31,20 @@ signed char encoder = 0;
 unsigned int pos;
 unsigned int pwm_value;
 
+unsigned char frx_event;
+unsigned char button_event;
+
 DateTime datetime;
 
 // Hardware defs
 //--------------------
 
-#define SDA_PIN     BIT7          // Bit 7 USCI Port 1(SDA)
-#define SCL_PIN     BIT6          // Bit 6 USCI Port 1(SCL)
+#define SDA_PIN     BIT7            // Bit 7 USCI Port 1(SDA)
+#define SCL_PIN     BIT6            // Bit 6 USCI Port 1(SCL)
 #define BUTTON BIT3                 // [P1.3]
 #define PHASE_A BIT4                // [P2.4]
 #define PHASE_B BIT5                // [P2.5]
+#define FRX BIT1                    // [P1.1]
 
 
 
@@ -64,10 +68,9 @@ int main(void){
 
     // Configure ports
     //------------------
-    P1DIR = 0x37;                               // P1.0 thru P1.5 OUTPUTS
-    P1REN = 0x08;                               // Enable pull-up/pull down on P1.3
-    P1IES = 0x01;                               // P1.0 is falling edge interrupt
-    P1OUT = 0x08;                               // Bit 3 = 1 i.e. pull up
+    P1DIR = 0x35;                               // P1.0 thru P1.5 OUTPUTS excepting P1.1 which is an input
+    P1REN = 0x0A;                               // Enable pull-up/pull down on P1.3 & P1.1
+    P1OUT = 0x0A;                               // Bit 3 & Bit 1 = 1 i.e. pull up
 
     P1OUT |= LCD_ENA;                           // LCD latch pin high
 
@@ -98,9 +101,9 @@ int main(void){
     // Configure other interrupts
     //---------------------------------
 
-    P1IES = 0x08;                               // High-to-low transition on P1.4
-    P1IE |= BUTTON;
-    P1IFG = 0x0;                                // Clear interrupt
+    P1IES = 0x0A;                               // High-to-low transition on P1.4 & P1.1
+    P1IE = 0x0A;   // 0x0A
+    P1IFG = 0x0;                                // Clear interrupts
 
     P2SEL2 = P2SEL2 & 0x3F;
     P2SEL = P2SEL & 0x3F;                       // P2.7 and P2.6 made GPIO
@@ -169,6 +172,14 @@ int main(void){
         sprintf(str, "%02X:%02X:%02X", datetime.hours, datetime.minutes, datetime.seconds);
         putString(str);
         NextLine();
+        if (frx_event == 1){
+            putString("FRX");
+            frx_event = 0;
+        }
+        if (button_event == 1){
+            putString("BUTTON");
+            button_event = 0;
+        }
         if (CheckWiegandData() == 1){
             // We have wiegand packet...
             tag[0] = 0;
@@ -219,15 +230,23 @@ int main(void){
 //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Port 1 interrupt service routine
-// Used for button on P1.3
+// Used for button on P1.3 and FRX input on P1.1
 //---------------------------------------------------
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void){
 
-    ;
-    BacklightON();
-    P1IFG = 0x0;                    // Clear interrupt
+    unsigned char iflags = P1IFG;
 
+    if (iflags & FRX){
+        frx_event = 1;
+    }
+    if (iflags & BUTTON){
+        BacklightON();
+        button_event = 1;
+    }
+
+
+    P1IFG = 0;
 }
 
 // Port 2 interrupt service routine
